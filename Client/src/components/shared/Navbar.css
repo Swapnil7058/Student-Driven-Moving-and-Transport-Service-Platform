@@ -1,0 +1,33 @@
+/* * This file handles the mobile navigation menu transitions.
+ * It's imported into Navbar.jsx.
+ */
+
+/* * Base style for the mobile navigation menu (initially hidden/closed). 
+ * This uses max-height for a smooth "slide down/up" effect.
+ * The 'md:hidden' utility class is still used in the React component 
+ * to ensure it doesn't display on desktop sizes.
+ */
+.mobile-nav-menu {
+    max-height: 0;
+    opacity: 0;
+    visibility: hidden;
+    /* Use a CSS transition property */
+    transition: max-height 0.35s ease-out, opacity 0.35s ease-out, visibility 0s 0.35s; 
+    overflow: hidden;
+    border-top: 1px solid rgba(255, 255, 255, 0.2); /* Soft white separator */
+}
+
+/* * Open state: Styles applied when the 'is-open' class is toggled on 
+ * by the React component.
+ */
+.mobile-nav-menu.is-open {
+    max-height: 500px; /* Needs to be larger than the content height */
+    opacity: 1;
+    visibility: visible;
+    transition: max-height 0.35s ease-in, opacity 0.35s ease-in, visibility 0s 0s;
+}
+
+/* * You could also add padding/margin here, but for flexibility 
+ * and consistency with Tailwind, I left the 'px-2 pt-2 pb-3 space-y-1' 
+ * on the inner <div> in the React component.
+ */

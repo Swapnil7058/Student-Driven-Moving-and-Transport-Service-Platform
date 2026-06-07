@@ -1,0 +1,39 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Backend Program ",
+  "keywords": [
+    "nodejs",
+    "express",
+    "jwt",
+    "middelware",
+    "backend"
+  ],
+  "license": "ISC",
+  "author": "Swapnil Dhotre",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "express-session": "^1.18.2",
+    "handlebars": "^4.7.8",
+    "jsonwebtoken": "^9.0.3",
+    "libphonenumber-js": "^1.12.38",
+    "mongoose": "^9.1.1",
+    "nodemailer": "^8.0.6",
+    "nodemon": "^3.1.11",
+    "socket.io": "^4.8.3",
+    "twilio": "^5.13.1"
+  }
+}
