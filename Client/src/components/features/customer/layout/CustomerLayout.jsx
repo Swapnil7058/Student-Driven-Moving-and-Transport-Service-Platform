@@ -3,11 +3,11 @@ import { Outlet } from "react-router-dom";
 import CustomerSidebar from "./CustomerSidebar";
 import CustomerHeader from "./CustomerHeader";
 import { useAuth } from "../../../../context/AuthContext";
-import Navbar from "../../../Shared/Navbar";
+import Navbar from "../../../shared/Navbar";
 import Footer from "../../../shared/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 
-const CustomerLayout = () => {
+const CustomerLayout = () => {``
   const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
