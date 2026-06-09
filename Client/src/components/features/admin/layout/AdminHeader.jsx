@@ -1,10 +1,17 @@
 import React, { useState } from "react";
 import { useAuth } from "../../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 const AdminHeader = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
 
   return (
     <div className="flex items-center justify-between bg-white shadow-sm px-6 py-4 rounded-lg mb-6">
@@ -48,7 +55,7 @@ const AdminHeader = () => {
                 className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg p-2 z-50"
               >
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 rounded"
                 >
                   Logout

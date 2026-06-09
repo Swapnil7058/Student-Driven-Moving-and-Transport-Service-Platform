@@ -1,8 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
 
 export default function AdminSidebar() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
 
   return (
     <aside className="min-h-screen w-64 bg-slate-900 p-6 text-slate-200">
@@ -34,7 +40,7 @@ export default function AdminSidebar() {
           Students
         </Link>
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="block text-red-400 hover:text-red-300"
         >
           Logout

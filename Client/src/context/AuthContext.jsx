@@ -233,13 +233,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-await fetch(`${API_BASE_URL}/auth/logout`,{
-    method: "POST",
-    credentials: "include",
-});
-
-setUser(null);
-};
+    try {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      // Always clear user state regardless of server response
+      setUser(null);
+    }
+  };
 
   const updateProfile = async (payload) => {
     const res = await fetch(`${API_BASE_URL}/auth/profile`, {

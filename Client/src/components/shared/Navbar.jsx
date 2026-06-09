@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from "/VANMAN-Logo(red).png";
 import "./Navbar.css";
 import { useAuth } from "../../context/AuthContext";
@@ -7,6 +7,13 @@ import { useAuth } from "../../context/AuthContext";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+    setIsOpen(false);
+  };
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -150,10 +157,7 @@ const Navbar = () => {
                 </Link>
 
                 <button
-                  onClick={() => {
-                    logout();
-                    setIsOpen(false);
-                  }}
+                  onClick={handleLogout}
                   className="text-red-600 font-semibold"
                 >
                   Logout
