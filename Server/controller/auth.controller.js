@@ -13,6 +13,20 @@ const generateToken = (user) =>
     expiresIn: process.env.JWT_EXPIRES,
   });
 
+const getCookieOptions = (req) => {
+  const isSecure =
+    process.env.NODE_ENV === "production" ||
+    req.secure ||
+    req.headers["x-forwarded-proto"] === "https";
+
+  return {
+    httpOnly: true,
+    sameSite: isSecure ? "none" : "lax",
+    secure: isSecure,
+    path: "/",
+  };
+};
+
 const hasTwilioConfig = () =>
   Boolean(
     process.env.TWILIO_ACCOUNT_SID &&
@@ -403,13 +417,9 @@ export const login = async (req, res) => {
     }
 
     const token = generateToken(user);
-    const isProduction = process.env.NODE_ENV === "production";
+    const cookieOptions = getCookieOptions(req);
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: isProduction ? "none" : "lax",
-      secure: isProduction,
-    });
+    res.cookie("token", token, cookieOptions);
 
     return res.json({
       success: true,
@@ -433,14 +443,10 @@ export const login = async (req, res) => {
 
 // Logout
 export const logout = (req, res) => {
-  const isProduction = process.env.NODE_ENV === "production";
-  
-  res.clearCookie("token", {
-    httpOnly: true,
-    sameSite: isProduction ? "none" : "lax",
-    secure: isProduction,
-  });
-  
+  const cookieOptions = getCookieOptions(req);
+
+  res.clearCookie("token", cookieOptions);
+
   return res.json({
     success: true,
     message: "Logged Out Successfully",
