@@ -10,18 +10,30 @@ const getTransporter = () => {
     console.warn("⚠️ Email service is not configured. Missing HOST_EMAIL or HOST_PASS");
     return null;
   }
-  
+
   if (transporter) return transporter;
 
   try {
     transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.HOST_EMAIL,
         pass: process.env.HOST_PASS,
       },
+      tls: {
+        rejectUnauthorized: false,
+      },
     });
-    console.log("✅ Email transporter initialized successfully");
+
+    transporter.verify((error) => {
+      if (error) {
+        console.error("❌ Email transporter verification failed:", error.message);
+      } else {
+        console.log("✅ Email transporter initialized successfully");
+      }
+    });
   } catch (error) {
     console.error("❌ Failed to initialize email transporter:", error.message);
     transporter = null;
@@ -33,7 +45,7 @@ const getTransporter = () => {
 export const sendEmail = async ({ to, subject, html }) => {
   const mailer = getTransporter();
   if (!mailer) {
-    const errorMsg = "Email service is not configured. Please set HOST_EMAIL and HOST_PASS environment variables";
+    const errorMsg = "Email service is not configured. Please set HOST_EMAIL and HOST_PASS environment variables.";
     console.error(`❌ ${errorMsg}`);
     throw new Error(errorMsg);
   }

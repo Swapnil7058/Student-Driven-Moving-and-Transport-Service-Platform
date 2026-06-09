@@ -199,9 +199,6 @@ export const sendPreSignupEmailOtp = async (req, res) => {
       isVerified: false,
     });
 
-    let emailSent = false;
-    let emailError = null;
-    
     try {
       await sendEmail({
         to: normalizedEmail,
@@ -212,24 +209,19 @@ export const sendPreSignupEmailOtp = async (req, res) => {
           <p>This OTP expires in 10 minutes.</p>
         `,
       });
-      emailSent = true;
     } catch (mailError) {
-      emailError = mailError.message;
       console.error("📧 EMAIL OTP SEND ERROR:", mailError.message);
-      // Don't return error - allow fallback for dev/testing
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send email OTP. Please check email service configuration.",
+      });
     }
 
-    // Always return success with OTP (for dev/testing when email is not configured)
     return res.json({
       success: true,
-      message: emailSent 
-        ? "Email OTP sent successfully" 
-        : "OTP generated (email service unavailable - use OTP for testing)",
+      message: "Email OTP sent successfully",
       data: {
-        otp: process.env.NODE_ENV === "production" && emailSent ? undefined : otp,
         expiresInSeconds: 600,
-        emailSent,
-        emailError: process.env.NODE_ENV === "development" ? emailError : undefined,
       },
     });
   } catch (error) {
@@ -676,9 +668,6 @@ export const resendEmailVerification = async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     const verifyEmailLink = `${frontendUrl}/auth?verifyEmailToken=${rawEmailToken}`;
 
-    let emailSent = false;
-    let emailError = null;
-
     try {
       await sendEmail({
         to: user.email,
@@ -690,22 +679,17 @@ export const resendEmailVerification = async (req, res) => {
           <p>This link expires in 24 hours.</p>
         `,
       });
-      emailSent = true;
     } catch (mailError) {
-      emailError = mailError.message;
       console.error("📧 EMAIL VERIFICATION SEND ERROR:", mailError.message);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send verification email. Please check email service configuration.",
+      });
     }
 
     return res.json({
       success: true,
-      message: emailSent 
-        ? "Verification email sent successfully"
-        : "Verification token generated (email service unavailable)",
-      data: {
-        verificationLink: process.env.NODE_ENV === "development" ? verifyEmailLink : undefined,
-        emailSent,
-        emailError: process.env.NODE_ENV === "development" ? emailError : undefined,
-      },
+      message: "Verification email sent successfully",
     });
   } catch (error) {
     console.error("RESEND EMAIL VERIFICATION ERROR:", error.message);
