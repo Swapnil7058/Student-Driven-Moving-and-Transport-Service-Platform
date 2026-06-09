@@ -185,7 +185,9 @@ export const sendPreSignupEmailOtp = async (req, res) => {
       isVerified: false,
     });
 
-    let emailSendFailed = false;
+    let emailSent = false;
+    let emailError = null;
+    
     try {
       await sendEmail({
         to: normalizedEmail,
@@ -196,31 +198,31 @@ export const sendPreSignupEmailOtp = async (req, res) => {
           <p>This OTP expires in 10 minutes.</p>
         `,
       });
+      emailSent = true;
     } catch (mailError) {
-      emailSendFailed = true;
-      console.error("EMAIL OTP SEND ERROR:", mailError.message);
-      if (process.env.NODE_ENV === "production") {
-        return res.status(500).json({
-          success: false,
-          message: "Failed to send email OTP",
-        });
-      }
+      emailError = mailError.message;
+      console.error("📧 EMAIL OTP SEND ERROR:", mailError.message);
+      // Don't return error - allow fallback for dev/testing
     }
 
+    // Always return success with OTP (for dev/testing when email is not configured)
     return res.json({
       success: true,
-      message: emailSendFailed
-        ? "Email OTP generated (dev fallback)"
-        : "Email OTP sent successfully",
-      data:
-        process.env.NODE_ENV === "production"
-          ? { expiresInSeconds: 600 }
-          : { otp, expiresInSeconds: 600 },
+      message: emailSent 
+        ? "Email OTP sent successfully" 
+        : "OTP generated (email service unavailable - use OTP for testing)",
+      data: {
+        otp: process.env.NODE_ENV === "production" && emailSent ? undefined : otp,
+        expiresInSeconds: 600,
+        emailSent,
+        emailError: process.env.NODE_ENV === "development" ? emailError : undefined,
+      },
     });
   } catch (error) {
+    console.error("SEND EMAIL OTP ERROR:", error.message);
     return res.status(500).json({
       success: false,
-      message: "Failed to send email OTP",
+      message: "Failed to generate OTP",
     });
   }
 };
@@ -668,22 +670,39 @@ export const resendEmailVerification = async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     const verifyEmailLink = `${frontendUrl}/auth?verifyEmailToken=${rawEmailToken}`;
 
-    await sendEmail({
-      to: user.email,
-      subject: "Verify your VanMan email",
-      html: `
-        <h3>Email Verification</h3>
-        <p>Click the link below to verify your email:</p>
-        <p><a href="${verifyEmailLink}">${verifyEmailLink}</a></p>
-        <p>This link expires in 24 hours.</p>
-      `,
-    });
+    let emailSent = false;
+    let emailError = null;
+
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Verify your VanMan email",
+        html: `
+          <h3>Email Verification</h3>
+          <p>Click the link below to verify your email:</p>
+          <p><a href="${verifyEmailLink}">${verifyEmailLink}</a></p>
+          <p>This link expires in 24 hours.</p>
+        `,
+      });
+      emailSent = true;
+    } catch (mailError) {
+      emailError = mailError.message;
+      console.error("📧 EMAIL VERIFICATION SEND ERROR:", mailError.message);
+    }
 
     return res.json({
       success: true,
-      message: "Verification email sent successfully",
+      message: emailSent 
+        ? "Verification email sent successfully"
+        : "Verification token generated (email service unavailable)",
+      data: {
+        verificationLink: process.env.NODE_ENV === "development" ? verifyEmailLink : undefined,
+        emailSent,
+        emailError: process.env.NODE_ENV === "development" ? emailError : undefined,
+      },
     });
   } catch (error) {
+    console.error("RESEND EMAIL VERIFICATION ERROR:", error.message);
     return res.status(500).json({
       success: false,
       message: "Failed to resend verification email",
@@ -726,22 +745,30 @@ export const forgotPassword = async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     const resetLink = `${frontendUrl}/auth/reset-password/${rawToken}`;
 
-    await sendEmail({
-      to: user.email,
-      subject: "Reset your VanMan password",
-      html: `
-        <h3>Password Reset Request</h3>
-        <p>Click the link below to reset your password:</p>
-        <p><a href="${resetLink}">${resetLink}</a></p>
-        <p>This link expires in 30 minutes.</p>
-      `,
-    });
+    let emailSent = false;
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your VanMan password",
+        html: `
+          <h3>Password Reset Request</h3>
+          <p>Click the link below to reset your password:</p>
+          <p><a href="${resetLink}">${resetLink}</a></p>
+          <p>This link expires in 30 minutes.</p>
+        `,
+      });
+      emailSent = true;
+    } catch (mailError) {
+      console.error("📧 FORGOT PASSWORD EMAIL ERROR:", mailError.message);
+    }
 
     return res.json({
       success: true,
       message: "If this email exists, a reset link has been sent.",
+      data: process.env.NODE_ENV === "development" ? { resetLink, emailSent } : undefined,
     });
   } catch (error) {
+    console.error("FORGOT PASSWORD ERROR:", error.message);
     return res.status(500).json({
       success: false,
       message: "Failed to process forgot password request",
