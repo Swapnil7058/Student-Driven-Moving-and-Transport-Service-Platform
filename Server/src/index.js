@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -12,6 +13,7 @@ import jobRoutes from "../routes/job.route.js";
 import authRoutes from "../routes/auth.route.js";
 import studentRouter from "../routes/student.route.js";
 
+dotenv.config();
 connectDB();
 
 const PORT = process.env.PORT || 3000;
