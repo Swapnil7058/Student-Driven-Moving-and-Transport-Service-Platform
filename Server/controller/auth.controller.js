@@ -210,11 +210,11 @@ export const sendPreSignupEmailOtp = async (req, res) => {
         `,
       });
     } catch (mailError) {
-      console.error("📧 EMAIL OTP SEND ERROR:", mailError.message);
+      console.error("📧 EMAIL OTP SEND ERROR:", mailError);
+
       return res.status(500).json({
         success: false,
-        message: "Failed to send email OTP. Please check email service configuration.",
-        error: process.env.NODE_ENV === "development" ? mailError.message : undefined,
+        message: "Failed to send email OTP",
       });
     }
 
@@ -684,7 +684,8 @@ export const resendEmailVerification = async (req, res) => {
       console.error("📧 EMAIL VERIFICATION SEND ERROR:", mailError.message);
       return res.status(500).json({
         success: false,
-        message: "Failed to send verification email. Please check email service configuration.",
+        message:
+          "Failed to send verification email. Please check email service configuration.",
       });
     }
 
@@ -756,7 +757,10 @@ export const forgotPassword = async (req, res) => {
     return res.json({
       success: true,
       message: "If this email exists, a reset link has been sent.",
-      data: process.env.NODE_ENV === "development" ? { resetLink, emailSent } : undefined,
+      data:
+        process.env.NODE_ENV === "development"
+          ? { resetLink, emailSent }
+          : undefined,
     });
   } catch (error) {
     console.error("FORGOT PASSWORD ERROR:", error.message);

@@ -63,7 +63,6 @@
 //   }
 // };
 
-
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
@@ -88,7 +87,11 @@ export const sendEmail = async ({ to, subject, html }) => {
     console.log("✅ Email sent:", info.messageId);
     return info;
   } catch (error) {
-    console.error("❌ Email Error:", error);
+    console.error("❌ FULL EMAIL ERROR");
+    console.error(error);
+    console.error(error?.message);
+    console.error(error?.response?.data);
+
     throw error;
   }
 };
