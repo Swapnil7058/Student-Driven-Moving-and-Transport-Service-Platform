@@ -214,6 +214,7 @@ export const sendPreSignupEmailOtp = async (req, res) => {
       return res.status(500).json({
         success: false,
         message: "Failed to send email OTP. Please check email service configuration.",
+        error: process.env.NODE_ENV === "development" ? mailError.message : undefined,
       });
     }
 

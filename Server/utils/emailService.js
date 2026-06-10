@@ -5,10 +5,11 @@ const hasEmailConfig = () =>
 
 let transporter = null;
 
-const getTransporter = () => {
+const getTransporter = async () => {
   if (!hasEmailConfig()) {
-    console.warn("⚠️ Email service is not configured. Missing HOST_EMAIL or HOST_PASS");
-    return null;
+    const errorMsg = "Email service is not configured. Missing HOST_EMAIL or HOST_PASS";
+    console.warn(`⚠️ ${errorMsg}`);
+    throw new Error(errorMsg);
   }
 
   if (transporter) return transporter;
@@ -22,32 +23,33 @@ const getTransporter = () => {
         user: process.env.HOST_EMAIL,
         pass: process.env.HOST_PASS,
       },
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 5000,
       tls: {
         rejectUnauthorized: false,
       },
     });
 
-    transporter.verify((error) => {
-      if (error) {
-        console.error("❌ Email transporter verification failed:", error.message);
-      } else {
-        console.log("✅ Email transporter initialized successfully");
-      }
-    });
+    await transporter.verify();
+    console.log("✅ Email transporter initialized successfully");
   } catch (error) {
     console.error("❌ Failed to initialize email transporter:", error.message);
     transporter = null;
+    throw error;
   }
 
   return transporter;
 };
 
 export const sendEmail = async ({ to, subject, html }) => {
-  const mailer = getTransporter();
-  if (!mailer) {
-    const errorMsg = "Email service is not configured. Please set HOST_EMAIL and HOST_PASS environment variables.";
-    console.error(`❌ ${errorMsg}`);
-    throw new Error(errorMsg);
+  let mailer;
+  try {
+    mailer = await getTransporter();
+  } catch (error) {
+    const errorMsg = "Email service is not configured or failed to connect. Please set HOST_EMAIL and HOST_PASS correctly.";
+    console.error(`❌ ${errorMsg}`, error.message);
+    throw new Error(error.message || errorMsg);
   }
 
   try {
