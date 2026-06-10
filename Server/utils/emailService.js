@@ -64,22 +64,31 @@
 // };
 
 
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.BREVO_SMTP_USER,
+    pass: process.env.BREVO_SMTP_KEY,
+  },
+});
 
 export const sendEmail = async ({ to, subject, html }) => {
   try {
-    const response = await resend.emails.send({
-      from: "onboarding@resend.dev",
+    const info = await transporter.sendMail({
+      from: "VanMan <yourverifiedemail@gmail.com>",
       to,
       subject,
       html,
     });
 
-    console.log("✅ Email sent successfully:", response);
+    console.log("✅ Email sent:", info.messageId);
+    return info;
   } catch (error) {
-    console.error("❌ Email send failed:", error);
+    console.error("❌ Email Error:", error);
     throw error;
   }
 };
