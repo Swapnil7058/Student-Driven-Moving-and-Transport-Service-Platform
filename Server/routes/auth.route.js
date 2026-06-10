@@ -21,6 +21,20 @@ import { protect } from "../middelware/authMiddleware.js";
 
 const router = express.Router();
 
+router.get("/test-email", async (req, res) => {
+  try {
+    await sendEmail({
+      to: "swapnildhotre9767@gmail.com",
+      subject: "VanMan Test",
+      html: "<h1>Brevo Working ✅</h1>",
+    });
+
+    res.send("Email Sent");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Failed");
+  }
+});
 router.post("/signup", register);
 router.post("/pre-signup/send-phone-otp", sendPreSignupPhoneOtp);
 router.post("/pre-signup/verify-phone-otp", verifyPreSignupPhoneOtp);
