@@ -22,9 +22,6 @@ const getTransporter = async () => {
         user: process.env.HOST_EMAIL,
         pass: process.env.HOST_PASS,
       },
-      connectionTimeout: 5000,
-      greetingTimeout: 5000,
-      socketTimeout: 5000,
     });
 
     await transporter.verify();
