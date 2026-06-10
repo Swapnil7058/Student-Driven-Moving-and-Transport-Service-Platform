@@ -24,6 +24,9 @@ const getTransporter = async () => {
       },
     });
 
+    console.log("HOST_EMAIL:", process.env.HOST_EMAIL);
+    console.log("HOST_PASS exists:", !!process.env.HOST_PASS);
+    
     await transporter.verify();
     console.log("✅ Email transporter initialized successfully");
   } catch (error) {
